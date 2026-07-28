@@ -22,23 +22,28 @@ class AppDatabase extends _$AppDatabase {
   int get schemaVersion => 1;
 
   static QueryExecutor _open(String keyHex) {
+    //
     return LazyDatabase(() async {
       final dir = await getApplicationDocumentsDirectory();
+
       final file = File(p.join(dir.path, 'sgsd.db'));
 
       return NativeDatabase.createInBackground(
         file,
+
         setup: (db) {
           final cipherVersion = db.select('pragma cipher_version;');
           if (cipherVersion.isEmpty) {
             throw StateError(
-              'SQLCipher not available — refusing to open a plaintext '
+              'SQLCipher not available, refusing to open a plaintext '
               'database',
             );
           }
+          //
 
           db
             ..execute("pragma key = \"x'$keyHex'\";")
+            // ..execute('pragma journal_mode = WAL;');
             ..execute('pragma journal_mode = WAL;');
         },
       );
