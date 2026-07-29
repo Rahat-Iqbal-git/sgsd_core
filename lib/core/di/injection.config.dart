@@ -37,6 +37,7 @@ import 'package:sgsd_core/services/location/tracking_engine.dart' as _i295;
 import 'package:sgsd_core/services/location/tracking_sensors.dart' as _i2;
 import 'package:sgsd_core/services/network/gorest_api_client.dart' as _i707;
 import 'package:sgsd_core/services/network/network_module.dart' as _i330;
+import 'package:sgsd_core/services/sync/sync_engine.dart' as _i254;
 
 extension GetItInjectableX on _i174.GetIt {
   // initializes the registration of main-scope dependencies inside of GetIt
@@ -76,6 +77,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1047.DispatchRepositoryImpl(
         gh<_i61.DispatchRemoteDataSource>(),
         gh<_i298.AppDatabase>(),
+      ),
+    );
+    gh.lazySingleton<_i254.SyncEngine>(
+      () => _i254.SyncEngine(
+        gh<_i295.TrackingEngine>(),
+        gh<_i298.AppDatabase>(),
+        gh<_i707.GoRestApiClient>(),
       ),
     );
     gh.factory<_i133.RefreshDispatchItems>(
