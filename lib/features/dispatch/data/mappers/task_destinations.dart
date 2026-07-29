@@ -1,6 +1,6 @@
 import 'package:sgsd_core/core/geo/geo_point.dart';
 
-// mock delivery points around Dhaka 
+// mock delivery points around Dhaka
 const _destinations = <GeoPoint>[
   GeoPoint(latitude: 23.810331, longitude: 90.412521),
   GeoPoint(latitude: 23.780812, longitude: 90.279234),
