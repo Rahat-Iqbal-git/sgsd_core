@@ -86,6 +86,11 @@ unlinked_spec.ds
 # Coverage
 coverage/
 
+# Local environment secrets (--dart-define-from-file). Real values never
+# committed; env/*.example.json templates stay tracked.
+**/env/*.json
+!**/env/*.example.json
+
 # Submodules
 packages/**/pubspec.lock
 
