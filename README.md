@@ -193,6 +193,25 @@ Being upfront about what's rough or missing, rather than pretending it isn't:
 
 ---
 
+## Releases
+
+Pushing a version tag (`git tag v1.0.0 && git push origin v1.0.0`) triggers
+`.github/workflows/release.yaml`: it builds a release APK and attaches it to
+a new GitHub Release. You can also trigger it manually from the Actions tab
+("release" workflow → "Run workflow") to build any flavor without tagging —
+useful for handing a reviewer a build without committing to a version number.
+
+That APK is **debug-signed**, not store-signed. It uses a throwaway keystore
+generated fresh in CI (reusing the env-var-driven signing config already in
+`android/app/build.gradle.kts`). It installs fine on a device for demoing,
+but isn't what you'd use to publish anywhere real. To make it a properly
+signed release instead: generate a keystore (`keytool -genkeypair -v
+-keystore release.keystore -alias sgsd -keyalg RSA -keysize 2048 -validity
+10000`), base64-encode it, and add it plus the alias/passwords as repo
+secrets (`ANDROID_KEYSTORE_BASE64`, `ANDROID_KEYSTORE_ALIAS`,
+`ANDROID_KEYSTORE_PASSWORD`, `ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD`) — the
+build.gradle.kts signing config already knows how to pick those up.
+
 ## Housekeeping
 
 - `dart run bloc_tools:bloc lint .` — checks Bloc/Cubit usage against
