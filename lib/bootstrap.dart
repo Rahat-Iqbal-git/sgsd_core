@@ -26,6 +26,8 @@ Future<void> bootstrap(
   EnvironmentConfig config,
   FutureOr<Widget> Function() builder,
 ) async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   FlutterError.onError = (details) {
     log(details.exceptionAsString(), stackTrace: details.stack);
   };
@@ -45,11 +47,6 @@ void _validateSecrets(EnvironmentConfig config) {
   if (config.goRestToken.isEmpty) {
     throw StateError(
       'GOREST_TOKEN is empty. Set it in env/${config.environment.name}.json.',
-    );
-  }
-  if (config.orsApiKey.isEmpty) {
-    throw StateError(
-      'ORS_API_KEY is empty. Set it in env/${config.environment.name}.json.',
     );
   }
 }
