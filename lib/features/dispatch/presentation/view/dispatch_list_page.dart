@@ -46,8 +46,10 @@ class DispatchView extends StatelessWidget {
         builder: (context, state) {
           if (state.isLoading) {
             return const Center(
-              child: CircularProgressIndicator(
-                semanticsLabel: 'Loading deliveries',
+              child: RepaintBoundary(
+                child: CircularProgressIndicator(
+                  semanticsLabel: 'Loading deliveries',
+                ),
               ),
             );
           }

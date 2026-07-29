@@ -7,10 +7,17 @@ class App extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final colorScheme = ColorScheme.fromSeed(
+      seedColor: Colors.black,
+      dynamicSchemeVariant: DynamicSchemeVariant.monochrome,
+    );
+
     return MaterialApp(
       theme: ThemeData(
+        colorScheme: colorScheme,
         appBarTheme: AppBarTheme(
-          backgroundColor: Theme.of(context).colorScheme.inversePrimary,
+          backgroundColor: colorScheme.primary,
+          foregroundColor: colorScheme.onPrimary,
         ),
         useMaterial3: true,
       ),
