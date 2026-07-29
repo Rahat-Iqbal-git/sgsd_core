@@ -26,9 +26,15 @@ import 'package:sgsd_core/features/dispatch/domain/usecases/watch_dispatch_items
     as _i162;
 import 'package:sgsd_core/features/dispatch/presentation/cubit/dispatch_cubit.dart'
     as _i659;
+import 'package:sgsd_core/features/tracking/presentation/cubit/tracking_cubit.dart'
+    as _i746;
 import 'package:sgsd_core/services/db/app_database.dart' as _i298;
 import 'package:sgsd_core/services/db/db_module.dart' as _i479;
 import 'package:sgsd_core/services/db/key/database_key_provider.dart' as _i950;
+import 'package:sgsd_core/services/location/geolocator_tracking_sensors.dart'
+    as _i893;
+import 'package:sgsd_core/services/location/tracking_engine.dart' as _i295;
+import 'package:sgsd_core/services/location/tracking_sensors.dart' as _i2;
 import 'package:sgsd_core/services/network/gorest_api_client.dart' as _i707;
 import 'package:sgsd_core/services/network/network_module.dart' as _i330;
 
@@ -43,6 +49,9 @@ extension GetItInjectableX on _i174.GetIt {
     final dbModule = _$DbModule();
     gh.factory<_i361.Dio>(() => networkModule.dio);
     gh.lazySingleton<_i558.FlutterSecureStorage>(() => dbModule.secureStorage);
+    gh.lazySingleton<_i2.TrackingSensors>(
+      () => _i893.GeolocatorTrackingSensors(),
+    );
     gh.lazySingleton<_i707.GoRestApiClient>(
       () =>
           _i707.GoRestApiClient(gh<_i361.Dio>(), gh<_i642.EnvironmentConfig>()),
@@ -52,6 +61,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i950.DatabaseKeyProvider>(
       () => _i950.DatabaseKeyProvider(gh<_i558.FlutterSecureStorage>()),
+    );
+    gh.lazySingleton<_i295.TrackingEngine>(
+      () => _i295.TrackingEngine(gh<_i2.TrackingSensors>()),
+    );
+    gh.factory<_i746.TrackingCubit>(
+      () => _i746.TrackingCubit(gh<_i295.TrackingEngine>()),
     );
     await gh.lazySingletonAsync<_i298.AppDatabase>(
       () => dbModule.appDatabase(gh<_i950.DatabaseKeyProvider>()),

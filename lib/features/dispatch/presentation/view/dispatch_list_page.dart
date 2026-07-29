@@ -4,14 +4,19 @@ import 'package:sgsd_core/core/di/injection.dart';
 import 'package:sgsd_core/features/dispatch/presentation/cubit/dispatch_cubit.dart';
 import 'package:sgsd_core/features/dispatch/presentation/cubit/dispatch_state.dart';
 import 'package:sgsd_core/features/dispatch/presentation/widgets/dispatch_item_tile.dart';
+import 'package:sgsd_core/features/tracking/presentation/cubit/tracking_cubit.dart';
+import 'package:sgsd_core/features/tracking/presentation/widgets/tracking_toggle.dart';
 
 class DispatchListPage extends StatelessWidget {
   const DispatchListPage({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (_) => getIt<DispatchCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider(create: (_) => getIt<DispatchCubit>()),
+        BlocProvider(create: (_) => getIt<TrackingCubit>()),
+      ],
       child: const DispatchView(),
     );
   }
@@ -23,7 +28,10 @@ class DispatchView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Dispatch')),
+      appBar: AppBar(
+        title: const Text('Dispatch'),
+        actions: const [TrackingToggle()],
+      ),
       body: BlocConsumer<DispatchCubit, DispatchState>(
         listener: (context, state) {
           final error = state.refreshError;
