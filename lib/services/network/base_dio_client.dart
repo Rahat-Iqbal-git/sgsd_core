@@ -75,6 +75,24 @@ abstract class BaseDioClient {
     );
   }
 
+  Future<Either<Failure, T>> patch<T>(
+    String url, {
+    dynamic data,
+    Map<String, dynamic>? queryParameters,
+    Options? options,
+    CancelToken? cancelToken,
+  }) async {
+    return _performRequest<T>(
+      () => _dio.patch<T>(
+        url,
+        data: data,
+        queryParameters: queryParameters,
+        options: options,
+        cancelToken: cancelToken,
+      ),
+    );
+  }
+
   Failure _mapDioException(DioException exception) {
     final statusCode = exception.response?.statusCode;
 

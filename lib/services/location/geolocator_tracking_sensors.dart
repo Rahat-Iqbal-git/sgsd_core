@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:geolocator/geolocator.dart';
 import 'package:injectable/injectable.dart';
 import 'package:sensors_plus/sensors_plus.dart';
@@ -27,15 +29,7 @@ class GeolocatorTrackingSensors implements TrackingSensors {
   @override
   Stream<Breadcrumb> positions(TrackingBand band) {
     return Geolocator.getPositionStream(
-      locationSettings: AndroidSettings(
-        accuracy: LocationAccuracy.high,
-        intervalDuration: band.interval,
-        foregroundNotificationConfig: const ForegroundNotificationConfig(
-          notificationTitle: 'Tracking active',
-          notificationText: 'Recording your delivery route',
-          enableWakeLock: true,
-        ),
-      ),
+      locationSettings: _settingsFor(band),
     ).map(
       (p) => Breadcrumb(
         position: GeoPoint(latitude: p.latitude, longitude: p.longitude),
@@ -46,8 +40,50 @@ class GeolocatorTrackingSensors implements TrackingSensors {
     );
   }
 
+  LocationSettings _settingsFor(TrackingBand band) {
+    if (Platform.isIOS) {
+      return AppleSettings(
+        accuracy: LocationAccuracy.high,
+        activityType: ActivityType.automotiveNavigation,
+        pauseLocationUpdatesAutomatically: true,
+        showBackgroundLocationIndicator: true,
+      );
+    }
+
+    return AndroidSettings(
+      accuracy: LocationAccuracy.high,
+      intervalDuration: band.interval,
+      foregroundNotificationConfig: const ForegroundNotificationConfig(
+        notificationTitle: 'Tracking active',
+        notificationText: 'Recording your delivery route',
+        enableWakeLock: true,
+      ),
+    );
+  }
+
   @override
   Stream<void> motion() {
     return userAccelerometerEventStream().where(isMoving).map((_) {});
+  }
+
+  @override
+  Future<GeoPoint?> currentPosition() async {
+    if (!await ensurePermission()) {
+      return null;
+    }
+
+    try {
+      final position = await Geolocator.getCurrentPosition(
+        locationSettings: const LocationSettings(
+          accuracy: LocationAccuracy.high,
+        ),
+      );
+      return GeoPoint(
+        latitude: position.latitude,
+        longitude: position.longitude,
+      );
+    } on Exception {
+      return null;
+    }
   }
 }
