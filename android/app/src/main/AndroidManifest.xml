@@ -1,8 +1,42 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+          xmlns:tools="http://schemas.android.com/tools">
+    <!-- Networking: required for GoRest/ORS/Nominatim calls in release builds.
+         This only exists in src/debug/AndroidManifest.xml today (injected by the
+         Flutter tool for hot reload) — without it here, a release build would have
+         NO network access at all. -->
+    <uses-permission android:name="android.permission.INTERNET"/>
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>
+
+    <!-- Location: needed by the motion-adaptive tracking engine (services/location/)
+         to read GPS fixes for breadcrumbs and routing. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+
+    <!-- Foreground service: the location engine runs as a foreground service while
+         tracking, and FOREGROUND_SERVICE_LOCATION / FOREGROUND_SERVICE_DATA_SYNC are
+         the Android 14+ (API 34) typed foreground-service permissions required
+         alongside the generic FOREGROUND_SERVICE permission. -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_LOCATION"/>
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+
+    <!-- Notifications: required on Android 13+ (API 33) to show the
+         foreground-service notification while tracking is active. -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
+
     <application
         android:label="${appName}"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- geolocator_android ships GeolocatorLocationService declaring only
+             foregroundServiceType="location". The assessment spec (docs/assessment.md
+             §4) requires the service be typed as both location and dataSync, so we
+             override the merged manifest entry with tools:replace to widen it. -->
+        <service
+            android:name="com.baseflow.geolocator.GeolocatorLocationService"
+            android:foregroundServiceType="location|dataSync"
+            tools:replace="android:foregroundServiceType" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

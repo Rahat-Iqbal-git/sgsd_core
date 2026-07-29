@@ -1,0 +1,98 @@
+name: release
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+  workflow_dispatch:
+    inputs:
+      flavor:
+        description: "Flavor to build"
+        required: true
+        default: production
+        type: choice
+        options:
+          - development
+          - staging
+          - production
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.44.x"
+          channel: stable
+
+      - run: flutter pub get
+
+      - run: dart run build_runner build --delete-conflicting-outputs
+
+      - name: Set flavor
+        id: flavor
+        run: |
+          FLAVOR="${{ inputs.flavor || 'production' }}"
+          echo "flavor=$FLAVOR" >> "$GITHUB_OUTPUT"
+
+      # Demo signing only: points the release buildType at a throwaway debug
+      # keystore, reusing the env-var branch already wired in
+      # android/app/build.gradle.kts.
+      - name: Generate throwaway debug keystore
+        run: |
+          mkdir -p "$HOME/.android"
+          keytool -genkeypair -v \
+            -keystore "$HOME/.android/debug.keystore" \
+            -storepass android -keypass android \
+            -alias androiddebugkey -keyalg RSA -keysize 2048 -validity 10000 \
+            -dname "CN=CI Demo,O=SGSD-Core,C=US"
+          {
+            echo "ANDROID_KEYSTORE_PATH=$HOME/.android/debug.keystore"
+            echo "ANDROID_KEYSTORE_ALIAS=androiddebugkey"
+            echo "ANDROID_KEYSTORE_PASSWORD=android"
+            echo "ANDROID_KEYSTORE_PRIVATE_KEY_PASSWORD=android"
+          } >> "$GITHUB_ENV"
+
+      - name: Write dart-define file
+        run: |
+          cat > "env/${{ steps.flavor.outputs.flavor }}.json" <<EOF
+          {
+            "GOREST_TOKEN": "${{ secrets.GOREST_TOKEN }}",
+            "ORS_API_KEY": "${{ secrets.ORS_API_KEY }}"
+          }
+          EOF
+
+      - name: Build APK
+        run: |
+          flutter build apk --release \
+            --flavor ${{ steps.flavor.outputs.flavor }} \
+            -t lib/main_${{ steps.flavor.outputs.flavor }}.dart \
+            --dart-define-from-file=env/${{ steps.flavor.outputs.flavor }}.json
+
+      - name: Locate APK
+        id: apk
+        run: |
+          PATH_OUT=$(find build/app/outputs/flutter-apk -name "*.apk" | head -n1)
+          echo "path=$PATH_OUT" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: sgsd_core-${{ steps.flavor.outputs.flavor }}-${{ github.run_number }}
+          path: ${{ steps.apk.outputs.path }}
+          retention-days: 30
+
+      - name: Create GitHub Release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ steps.apk.outputs.path }}
+          generate_release_notes: true
+          body: |
+            Debug-signed demo build — installable for testing, not store-signed.
+            See README "Housekeeping" for signing details.

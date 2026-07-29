@@ -32,7 +32,10 @@ android {
         applicationId = "com.rahatiqbal.sgsd_core"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Pinned explicitly (not flutter.minSdkVersion) so a future Flutter default
+        // change can't silently drop below what SQLCipher (>=23) and the location
+        // plugins require.
+        minSdk = 24
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName
