@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:sgsd_core/features/dispatch/domain/entities/delivery_status.dart';
 import 'package:sgsd_core/features/dispatch/domain/entities/dispatch_item.dart';
+import 'package:sgsd_core/features/routing/presentation/view/delivery_map_page.dart';
 
 class DispatchItemTile extends StatelessWidget {
   const DispatchItemTile({required this.item, super.key});
@@ -20,6 +21,11 @@ class DispatchItemTile extends StatelessWidget {
         title: Text(item.recipientName),
         subtitle: Text(item.recipientEmail),
         trailing: _StatusBadge(status: item.status),
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute<void>(
+            builder: (_) => DeliveryMapPage(item: item),
+          ),
+        ),
       ),
     );
   }

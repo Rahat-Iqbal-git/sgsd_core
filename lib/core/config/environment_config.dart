@@ -7,4 +7,5 @@ abstract interface class EnvironmentConfig {
   String get goRestToken;
   String get orsApiKey;
   String get goRestBaseUrl;
+  String get orsBaseUrl;
 }

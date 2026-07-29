@@ -26,17 +26,28 @@ import 'package:sgsd_core/features/dispatch/domain/usecases/watch_dispatch_items
     as _i162;
 import 'package:sgsd_core/features/dispatch/presentation/cubit/dispatch_cubit.dart'
     as _i659;
+import 'package:sgsd_core/features/routing/data/datasources/ors_remote_datasource.dart'
+    as _i765;
+import 'package:sgsd_core/features/routing/data/repositories/routing_repository_impl.dart'
+    as _i374;
+import 'package:sgsd_core/features/routing/domain/repositories/routing_repository.dart'
+    as _i129;
+import 'package:sgsd_core/features/routing/presentation/cubit/delivery_map_cubit.dart'
+    as _i14;
 import 'package:sgsd_core/features/tracking/presentation/cubit/tracking_cubit.dart'
     as _i746;
 import 'package:sgsd_core/services/db/app_database.dart' as _i298;
 import 'package:sgsd_core/services/db/db_module.dart' as _i479;
 import 'package:sgsd_core/services/db/key/database_key_provider.dart' as _i950;
+import 'package:sgsd_core/services/geocoding/reverse_geocoder.dart' as _i371;
 import 'package:sgsd_core/services/location/geolocator_tracking_sensors.dart'
     as _i893;
 import 'package:sgsd_core/services/location/tracking_engine.dart' as _i295;
 import 'package:sgsd_core/services/location/tracking_sensors.dart' as _i2;
 import 'package:sgsd_core/services/network/gorest_api_client.dart' as _i707;
 import 'package:sgsd_core/services/network/network_module.dart' as _i330;
+import 'package:sgsd_core/services/network/nominatim_api_client.dart' as _i185;
+import 'package:sgsd_core/services/network/ors_api_client.dart' as _i722;
 import 'package:sgsd_core/services/sync/sync_engine.dart' as _i254;
 
 extension GetItInjectableX on _i174.GetIt {
@@ -57,11 +68,26 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i707.GoRestApiClient(gh<_i361.Dio>(), gh<_i642.EnvironmentConfig>()),
     );
+    gh.lazySingleton<_i185.NominatimApiClient>(
+      () => _i185.NominatimApiClient(
+        gh<_i361.Dio>(),
+        gh<_i642.EnvironmentConfig>(),
+      ),
+    );
+    gh.lazySingleton<_i722.OrsApiClient>(
+      () => _i722.OrsApiClient(gh<_i361.Dio>(), gh<_i642.EnvironmentConfig>()),
+    );
     gh.lazySingleton<_i61.DispatchRemoteDataSource>(
       () => _i61.DispatchRemoteDataSource(gh<_i707.GoRestApiClient>()),
     );
+    gh.lazySingleton<_i765.OrsRemoteDataSource>(
+      () => _i765.OrsRemoteDataSource(gh<_i722.OrsApiClient>()),
+    );
     gh.lazySingleton<_i950.DatabaseKeyProvider>(
       () => _i950.DatabaseKeyProvider(gh<_i558.FlutterSecureStorage>()),
+    );
+    gh.lazySingleton<_i129.RoutingRepository>(
+      () => _i374.RoutingRepositoryImpl(gh<_i765.OrsRemoteDataSource>()),
     );
     gh.lazySingleton<_i295.TrackingEngine>(
       () => _i295.TrackingEngine(gh<_i2.TrackingSensors>()),
@@ -73,10 +99,24 @@ extension GetItInjectableX on _i174.GetIt {
       () => dbModule.appDatabase(gh<_i950.DatabaseKeyProvider>()),
       preResolve: true,
     );
+    gh.lazySingleton<_i371.ReverseGeocoder>(
+      () => _i371.ReverseGeocoder(
+        gh<_i185.NominatimApiClient>(),
+        gh<_i298.AppDatabase>(),
+      ),
+    );
     gh.lazySingleton<_i611.DispatchRepository>(
       () => _i1047.DispatchRepositoryImpl(
         gh<_i61.DispatchRemoteDataSource>(),
         gh<_i298.AppDatabase>(),
+      ),
+    );
+    gh.factory<_i14.DeliveryMapCubit>(
+      () => _i14.DeliveryMapCubit(
+        gh<_i129.RoutingRepository>(),
+        gh<_i371.ReverseGeocoder>(),
+        gh<_i2.TrackingSensors>(),
+        gh<_i295.TrackingEngine>(),
       ),
     );
     gh.lazySingleton<_i254.SyncEngine>(

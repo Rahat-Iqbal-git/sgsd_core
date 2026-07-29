@@ -43,6 +43,12 @@ class _DevelopmentConfig implements EnvironmentConfig {
     'GOREST_BASE_URL',
     defaultValue: 'https://gorest.in/public/v2',
   );
+
+  @override
+  String get orsBaseUrl => const String.fromEnvironment(
+    'ORS_BASE_URL',
+    defaultValue: 'https://api.openrouteservice.org',
+  );
 }
 
 class _StagingConfig implements EnvironmentConfig {
@@ -73,6 +79,12 @@ class _StagingConfig implements EnvironmentConfig {
     'GOREST_BASE_URL',
     defaultValue: 'https://gorest.in/public/v2',
   );
+
+  @override
+  String get orsBaseUrl => const String.fromEnvironment(
+    'ORS_BASE_URL',
+    defaultValue: 'https://api.openrouteservice.org',
+  );
 }
 
 class _ProductionConfig implements EnvironmentConfig {
@@ -99,5 +111,11 @@ class _ProductionConfig implements EnvironmentConfig {
   String get goRestBaseUrl => const String.fromEnvironment(
     'GOREST_BASE_URL',
     defaultValue: 'https://gorest.in/public/v2',
+  );
+
+  @override
+  String get orsBaseUrl => const String.fromEnvironment(
+    'ORS_BASE_URL',
+    defaultValue: 'https://api.openrouteservice.org',
   );
 }
