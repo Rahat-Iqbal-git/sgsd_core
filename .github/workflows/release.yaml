@@ -81,7 +81,7 @@ jobs:
           PATH_OUT=$(find build/app/outputs/flutter-apk -name "*.apk" | head -n1)
           echo "path=$PATH_OUT" >> "$GITHUB_OUTPUT"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v6
         with:
           name: sgsd_core-${{ steps.flavor.outputs.flavor }}-${{ github.run_number }}
           path: ${{ steps.apk.outputs.path }}
